@@ -1,0 +1,111 @@
+﻿Main window tasks
+
+
+$values are inputted values, for easier comprehension of the code. As we are doing the heavyweight version for the phase 3 of the project, if the physical codes are required, the codes will be provided as requested.
+
+
+* Registration
+   * As Visitor
+      * INSERT INTO Zoo.User Value ($Username, $Email, $Hashed Password);
+      * INSERT INTO Zoo.Visitor Value ($Username);
+   * As Staff
+      * INSERT INTO Zoo.User Value ($Username, $Email, $Hashed Password);
+      * INSERT INTO Zoo.Staff Value ($Username);
+
+
+* Sign in
+   * As Admin
+      * SELECT * FROM ZOO.USER WHERE email = %$Email AND Password = $Password = > Hashed Password
+      * SELECT * FROM ZOO.Admin where Username = %s;
+   * As Staff
+      * SELECT * FROM ZOO.USER WHERE email = %$Email AND Password = $Password = > Hashed Password
+      * SELECT * FROM ZOO.staff where Username = %s;
+   * As Visitor
+      * SELECT * FROM ZOO.USER WHERE email = %$Email AND Password = $Password = > Hashed Password
+      * SELECT * FROM ZOO.visitor where Username = %s;
+
+
+Visitor Tasks
+* Load list of Exhibits
+   * SELECT Name, Size, numAnimals, Water_Feature  from zoo.exhibit join (select count(*) as numAnimals, animal.Exhibit from zoo.animal group by animal.Exhibit) as a on exhibit.name = a.exhibit;
+* Sort the list of exhibits
+   * SELECT Name, Size, numAnimals, Water_Feature  from zoo.exhibit join(select count(*) as numAnimals, animal.Exhibit from zoo.animal group by animal.Exhibit) as a on exhibit.name = a.exhibit order by self.sqlheaderList[$Header], self.orderdict[$ASC or DESC];
+* Search for Exhibit
+   * SELECT Name, Size, numAnimals, Water_Feature  from zoo.exhibit join + (select count(*) as numAnimals, animal.Exhibit from zoo.animal group by animal.Exhibit) as a + on exhibit.name = a.exhibit where name like %$exhibitName% and size>= $sizeMin and size<= $sizeMax and numAnimals>= $numMin + and numAnimals<= $numMax;
+* Load Exhibit Details
+   * SELECT Name, Size, numAnimals, Water_Feature  from zoo.exhibit join (select count(*) as numAnimals, animal.Exhibit from zoo.animal group by animal.Exhibit) as a on exhibit.name = a.exhibit WHERE name = $exhibit;  (for exhibit details)
+* Load the list of animals living in an exhibit
+   * SELECT name, species from zoo.Animal WHERE exhibit= $exhibit;
+* Load Animal Details
+   * SELECT * from zoo.Animal WHERE name= $animalName and species = $animalSpecies;
+* Log Exhibit Visit
+   * INSERT INTO zoo.exhibit_visit VALUES ($username, $exhibit, curtime() );
+* Load List of Animals
+   * SELECT * FROM zoo.animal
+* Sort the Shows
+   * SELECT name, location, datetime from zoo.SHOW order by $Header $Desc $ or $ASC;
+* Sort the Animals
+   * Select * from zoo.ANIMAL order by $Header $Desc $ASC;
+* Search for Animal
+   * SELECT * FROM zoo.Animal WHERE name like %$nameToStr% AND species like %$speciesToStr% AND age >=  $minToInt AND age <= $maxToInt  AND type like %$typeToStr% and exhibit like %$exhibitToString%;
+* Load List of Shows
+   * SELECT name, location, datetime FROM zoo.Show;
+* Search for Show
+   * SELECT name, location, datetime FROM zoo.Show where name like $showName AND location like $exhibit AND datetime>={{ts %$date  00:00}} AND datetime<{{ts $nextdate 00:00}}; 
+* Log Show Visit (Simultaneously, Exhibit Visit)
+   * INSERT INTO zoo.show_visit values ($username, $showname, {{ts $showtime}});
+   * INSERT INTO zoo.exhibit_visit values ($username, $showExhibit, {{ts $showtime}});
+* Load Exhibit Visit History
+   * SELECT a.Exhibit, a.datetime, visitedNum FROM zoo.exhibit_visit as a, (select exhibit_visit.exhibit, exhibit_visit.visitor, count(*) as visitedNum FROM zoo.exhibit_visit WHERE visitor= $username GROUP BY exhibit_visit.exhibit) as b WHERE a.exhibit = b.exhibit AND a.visitor = b.visitor;
+* Search for Exhibit Visit
+   * SELECT a.Exhibit, a.datetime, visitedNum FROM zoo.exhibit_visit as a, (select exhibit_visit.exhibit, exhibit_visit.visitor, count(*) as visitedNum FROM zoo.exhibit_visit WHERE visitor= $username  group by exhibit_visit.exhibit) as b WHERE a.exhibit = b.exhibit AND a.visitor = b.visitor AND a.exhibit like %$exhibitName% AND datetime>= {{ts $date}} AND datetime<= {{ts $nextdate}} AND visitedNum >= $visitMin  AND visitedNum <= $visitMax;
+
+
+* Load Show Visit History
+   * SELECT show_visit, show.datetime, show.location FROM zoo.show_visit, zoo.show WHERE show.name=show_visit.show_visit AND show_visit.visitor=$username AND show.Datetime=show_visit.Datetime;
+
+
+* Search for Show History
+   * SELECT show_visit, show.datetime, show.location FROM zoo.show_visit, zoo.show WHERE show.name=show_visit.show_visit AND show_visit.visitor= $username AND show.name like %$showName% AND show_visit.datetime>= {{ts $date }} AND show_visit.datetime<= {{ts $nextdate}} AND show.location like %$exhibit%;
+
+
+Staff Tasks
+* Load Show list for the staff
+   * SELECT name, datetime, location from zoo.show WHERE host_staff = $username ; 
+* Load Animal List
+   * SELECT * FROM Animal;
+* Load Animal Detail
+   * See “Load Animal Details” in Visitor Tasks
+* Create an Animal Care Note
+   * INSERT INTO zoo.note values ($animalName, $animalSpecies, $username, $note, curtime() );
+* Search for Animal
+   * See “Search for Animal” in Visitor Tasks
+
+
+
+
+AdminTasks
+* Load the list of visitors
+   * SELECT username, email FROM User NATURAL JOIN Visitor;
+* Remove a visitor
+   * DELETE FROM User WHERE username = $username;
+* Load the list of Staffs
+   * SELECT username, email FROM User NATURAL JOIN Staff; 
+* Remove a staff
+   * DELETE FROM User WHERE username = $username;
+* Load the list of shows
+   * SELECT * FROM Zoo.Show;
+* Search for show
+   * SELECT * FROM zoo.Show WHERE name like %$name% AND location like %$exhibit% AND datetime>={{ts $date 00:00}} AND datetime<{{ts $nextdate  00:00}}; 
+* Remove a show
+   * DELETE FROM zoo.Show WHERE name = $showName AND datetime = {{st $showname}} AND location=$showLocation
+* Load the list of Animals
+   * SELECT * FROM Animal; 
+* Search for an Animal
+   * SELECT * FROM zoo.Animal WHERE name like %$nameToStr% AND species like %$speciesToStr% AND age >= $minToInt AND age <= $maxToInt AND type like %$typeToStr% AND exhibit like %$exhibitToString%;
+* Add an Animal
+   * INSERT INTO Animal VALUE ($name, $species, $age, $animaltype,  $exhibit);
+* Remove an Animal
+   * DELETE FROM zoo.Animal WHERE name = $animalName AND species= $species;
+* Add a show
+   * INSERT INTO zoo.Show VALUE ($name, {{ts $date $time}}, $exhibit,  $staff);
